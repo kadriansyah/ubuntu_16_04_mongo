@@ -1,4 +1,4 @@
-# image name: kadriansyah/mongo_4_1_8_mongo:v1
+# image name: kadriansyah/mongo_4_1_8:v1
 FROM  mongo:4.1.8-xenial
 LABEL version="1.0"
 LABEL maintainer="Kiagus Arief Adriansyah <kadriansyah@gmail.com>"
