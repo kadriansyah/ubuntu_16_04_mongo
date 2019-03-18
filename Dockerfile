@@ -1,4 +1,4 @@
-# image name: kadriansyah/mongo:v1
+# image name: kadriansyah/ubuntu_16_04_mongo:v1
 FROM  ubuntu:16.04
 LABEL version="1.0"
 LABEL maintainer="Kiagus Arief Adriansyah <kadriansyah@gmail.com>"
