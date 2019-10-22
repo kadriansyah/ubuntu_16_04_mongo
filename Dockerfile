@@ -19,9 +19,9 @@ RUN set -eux; \
 	rm -rf /var/lib/apt/lists/*
 
 # grab gosu for easy step-down from root (https://github.com/tianon/gosu/releases)
-ENV GOSU_VERSION 1.10
+ENV GOSU_VERSION 1.11
 # grab "js-yaml" for parsing mongod's YAML config files (https://github.com/nodeca/js-yaml/releases)
-ENV JSYAML_VERSION 3.10.0
+ENV JSYAML_VERSION 3.13.1
 
 RUN set -ex; \
 	\
@@ -66,14 +66,14 @@ ARG MONGO_PACKAGE=mongodb-org
 ARG MONGO_REPO=repo.mongodb.org
 ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 
-ENV MONGO_MAJOR 4.0
-ENV MONGO_VERSION 4.0.6
+ENV MONGO_MAJOR 4.2
+ENV MONGO_VERSION 4.2.1
 
 RUN echo "deb [ arch=amd64,arm64 ] http://$MONGO_REPO/apt/ubuntu xenial/${MONGO_PACKAGE%}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%}-${MONGO_MAJOR%}.list"
 
 RUN set -x \
 	&& apt-get update \
-	&& apt-get install -y \
+	&& apt-get install -y --allow-unauthenticated\
 		${MONGO_PACKAGE}=$MONGO_VERSION \
 		${MONGO_PACKAGE}-server=$MONGO_VERSION \
 		${MONGO_PACKAGE}-shell=$MONGO_VERSION \
@@ -85,6 +85,9 @@ RUN set -x \
 
 RUN mkdir -p /data/db /data/configdb && chown -R mongodb:mongodb /data/db /data/configdb
 VOLUME /data/db /data/configdb
+
+# forward request and error logs to docker log collector
+RUN ln -sf /dev/stdout /var/log/mongodb/mongod.log
 
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
