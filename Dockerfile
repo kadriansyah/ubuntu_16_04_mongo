@@ -20,15 +20,13 @@ RUN set -eux; \
 
 # grab gosu for easy step-down from root (https://github.com/tianon/gosu/releases)
 ENV GOSU_VERSION 1.11
+
 # grab "js-yaml" for parsing mongod's YAML config files (https://github.com/nodeca/js-yaml/releases)
 ENV JSYAML_VERSION 3.13.1
 
 RUN set -ex; \
-	\
 	apt-get update; \
-	apt-get install -y --no-install-recommends \
-		wget \
-	; \
+	apt-get install -y --no-install-recommends wget; \
 	if ! command -v gpg > /dev/null; then \
 		apt-get install -y --no-install-recommends gnupg dirmngr; \
 	fi; \
@@ -51,23 +49,19 @@ RUN set -ex; \
 
 RUN mkdir /docker-entrypoint-initdb.d
 
-ENV GPG_KEYS 9DA31620334BD75D9DCB49F368818C72E52529D4
-RUN set -ex; \
-	export GNUPGHOME="$(mktemp -d)"; \
-	for key in $GPG_KEYS; do \
-		gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
-	done; \
-	gpg --batch --export $GPG_KEYS > /etc/apt/trusted.gpg.d/mongodb.gpg; \
-	command -v gpgconf && gpgconf --kill all || :; \
-	rm -r "$GNUPGHOME"; \
-	apt-key list
-
 ARG MONGO_PACKAGE=mongodb-org
 ARG MONGO_REPO=repo.mongodb.org
 ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 
 ENV MONGO_MAJOR 4.2
 ENV MONGO_VERSION 4.2.1
+
+RUN set -ex; \
+	apt-get update; \
+	apt-get install -y --no-install-recommends wget; \
+	wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add -; \
+	apt-get install gnupg; \
+	apt-get purge -y --auto-remove wget
 
 RUN echo "deb [ arch=amd64,arm64 ] http://$MONGO_REPO/apt/ubuntu xenial/${MONGO_PACKAGE%}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%}-${MONGO_MAJOR%}.list"
 
